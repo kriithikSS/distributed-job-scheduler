@@ -1,0 +1,146 @@
+# Intern Assignment: Distributed Job Scheduler
+
+## Objective
+Design and build a production-inspired distributed job scheduling platform capable of reliably executing asynchronous background jobs across multiple workers.
+
+The project evaluates:
+- Backend engineering
+- Database design
+- Concurrency
+- Reliability
+- API design
+- Full-stack implementation
+
+Focus is on engineering quality rather than feature count.
+
+## Core Requirements
+- Authentication and project management (each project owns multiple job queues)
+- Queue configuration:
+  - Priority
+  - Concurrency limits
+  - Retry policy
+  - Pause/Resume
+  - Statistics
+- Create jobs through REST APIs:
+  - Immediate
+  - Delayed
+  - Scheduled
+  - Recurring (Cron)
+  - Batch jobs
+- Worker service:
+  - Poll queues
+  - Atomically claim jobs
+  - Concurrent execution
+  - Heartbeats
+  - Graceful shutdown
+- Job lifecycle:
+  `Queued → Scheduled → Claimed → Running → Completed`
+  - Retries
+  - Dead Letter Queue (DLQ) support
+- Retry strategies:
+  - Fixed delay
+  - Linear backoff
+  - Exponential backoff
+- Track:
+  - Execution logs
+  - Retry history
+  - Worker assignment
+  - Timestamps
+  - Execution metrics
+- Web dashboard:
+  - Queue management
+  - Job inspection
+  - Worker monitoring
+  - Retry failed jobs
+  - Throughput visualization
+  - System health monitoring
+
+## Database Design
+Design an efficient relational schema for:
+- Users
+- Organizations
+- Projects
+- Queues
+- Jobs
+- Job Executions
+- Retry Policies
+- Workers
+- Worker Heartbeats
+- Job Logs
+- Scheduled Jobs
+- Dead Letter Queue Entries
+
+Explain:
+- Primary keys
+- Foreign keys
+- Indexes
+- Normalization
+- Cascading behavior
+- Performance considerations
+
+## Backend Expectations
+REST APIs should support:
+- Validation
+- Authentication
+- Pagination
+- Filtering
+- Structured error handling
+- Logging
+
+Execution requirements:
+- Atomic job claiming
+- Idempotent execution wherever appropriate
+
+## Frontend Expectations
+Responsive dashboard including:
+- Queue health
+- Worker status
+- Job explorer
+- Execution logs
+- Queue configuration
+- Metrics
+- Live updates (Polling or WebSockets)
+
+## Bonus Features
+- Workflow dependencies
+- Rate limiting
+- Distributed locking
+- Queue sharding
+- Event-driven execution
+- WebSocket live updates
+- Role-based access control (RBAC)
+- AI-generated failure summaries
+
+## Deliverables
+- Source code + setup instructions
+- Architecture diagram
+- ER diagram
+- API documentation
+- Design decisions document (trade-offs)
+- Automated tests for critical functionality
+
+## Evaluation Criteria
+
+| Area | Marks |
+|------|------:|
+| System Architecture | 20 |
+| Database Design | 20 |
+| Backend Engineering | 20 |
+| Reliability & Concurrency | 15 |
+| Frontend & UX | 10 |
+| API Design | 5 |
+| Documentation | 5 |
+| Testing | 5 |
+
+## Evaluation Focus
+Priority is given to:
+- Engineering quality
+- Modular architecture
+- Database design
+- Reliability
+- Concurrency handling
+- Observability
+- Documentation
+- Maintainability
+
+Feature count is less important than overall engineering quality.

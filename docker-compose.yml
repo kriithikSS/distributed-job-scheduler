@@ -1,0 +1,91 @@
+services:
+  # ── PostgreSQL ──────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: jobscheduler-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: job_scheduler
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d job_scheduler"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ── API Server ──────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: jobscheduler-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/job_scheduler
+      JWT_SECRET: super-secret-jwt-key-change-in-production
+      JWT_EXPIRES_IN: 7d
+      PORT: 3001
+      NODE_ENV: production
+      CORS_ORIGIN: http://localhost:5173
+    ports:
+      - "3001:3001"
+    command: >
+      sh -c "
+        until nc -z postgres 5432; do
+          echo 'Waiting for postgres TCP...'; sleep 2;
+        done &&
+        npx prisma migrate deploy &&
+        npx prisma db seed &&
+        node dist/index.js
+      "
+
+  # ── Worker Service ──────────────────────────────────────────────────────────
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: jobscheduler-worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/job_scheduler
+      JWT_SECRET: super-secret-jwt-key-change-in-production
+      NODE_ENV: production
+      WORKER_POLL_INTERVAL_MS: 1000
+      WORKER_HEARTBEAT_INTERVAL_MS: 5000
+      WORKER_RECOVERY_INTERVAL_MS: 30000
+      STALLED_JOB_TIMEOUT_MS: 30000
+      WORKER_CONCURRENCY: 10
+    command: >
+      sh -c "
+        until nc -z postgres 5432; do
+          echo 'Waiting for postgres TCP...'; sleep 2;
+        done &&
+        node dist/worker-entry.js
+      "
+
+  # ── Frontend ─────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: jobscheduler-frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "5173:80"
+
+volumes:
+  pgdata:
